@@ -1,7 +1,7 @@
 .PHONY: all install
 
-PREFIX="/usr/local"
-DIR="${PREFIX}/share/clipboard-collector"
+PREFIX=/usr/local
+DIR=${PREFIX}/share/clipboard-collector
 
 all:
 	@echo "To install type 'sudo make install'"
