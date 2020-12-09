@@ -11,16 +11,21 @@ class Collector(object):
 
     def __init__(self) -> None:
         self.contains = []
-        self.end_word = "exit"
+        self.actions = {
+            "collect": self.collect,
+            "exit": self.exit_
+        }
 
-    def is_end(self) -> bool:
-        if self.current == self.end_word:
-            return True
-        return False
+    def exit_(self) -> bool:
+        self.collect()
+        return "END"
 
-    def end_collecting(self) -> None:
+    def collect(self) -> None:
         pyperclip.copy("\n".join(self.contains[1:]))
         logging.debug(" ".join(self.contains[1:]))
+        logging.info("Collected")
+        self.contains = []
+        return "OK"
 
     def check(self) -> str:
         """
@@ -29,14 +34,13 @@ class Collector(object):
         """
         self.current = pyperclip.paste()
         if len(self.contains) == 0:
+            logging.info("Old")
             self.contains.append(self.current)
-            logging.debug(self.contains[-1])
-            logging.info("New clipboard")
-
+            logging.debug(self.contains[-1].replace("\n", " "))
+            logging.info("Collector ready")
         if self.contains[-1] != self.current:
-            if self.is_end():
-                self.end_collecting()
-                return "END"
+            if self.current in self.actions.keys():
+                return self.actions[self.current]()
             logging.debug(self.current)
             self.contains.append(self.current)
         return "OK"
