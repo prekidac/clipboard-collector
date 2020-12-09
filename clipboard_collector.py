@@ -20,21 +20,25 @@ class Collector(object):
         if not self.verbose:
             logging.disable(logging.CRITICAL)
 
-    def exit_(self) -> bool:
-        self.collect()
-        return "END"
+    def backup(self) -> None:
+        with open("/tmp/clipboard", "a") as f:
+            f.write(self.current + "\n")
 
-    def collect(self) -> None:
+    def exit_(self) -> str:
+        self.collect()
+        return "EXIT"
+
+    def collect(self) -> str:
         pyperclip.copy("\n".join(self.contains[1:]))
         logging.debug(" ".join(self.contains[1:]))
         logging.info("Collected")
         self.contains = []
-        return "OK"
+        return "COLLECTED"
 
     def check(self) -> str:
         """
         Check for changes
-        Returns: OK or END
+        Returns: status
         """
         self.current = pyperclip.paste()
         if len(self.contains) == 0:
@@ -47,13 +51,15 @@ class Collector(object):
                 return self.actions[self.current]()
             logging.debug(self.current)
             self.contains.append(self.current)
+            self.backup()
         return "OK"
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Clipboard collecting deamon")
-    parser.add_argument("-v", "--verbose", action="store_true", help="display log messages")
+    parser.add_argument("-v", "--verbose", action="store_true",
+                        help="display log messages")
     args = parser.parse_args()
     c = Collector(verbose=args.verbose)
-    while c.check() == "OK":
+    while c.check() != "EXIT":
         time.sleep(1)
