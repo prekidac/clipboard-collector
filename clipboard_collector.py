@@ -23,8 +23,6 @@ class Collector(object):
         if not self.verbose:
             logging.disable(logging.CRITICAL)
 
-    # TODO: check if its already running
-
     def backup(self) -> None:
         with open("/tmp/clipboard", "a") as f:
             f.write(self.current + "\n")
@@ -36,7 +34,7 @@ class Collector(object):
     def collect(self) -> str:
         logging.info("Collected")
         logging.debug(" ".join(self.contains[1:]))
-        # prevent multiple copy of collect to erase collected
+        # prevent multiple copy of 'collect' to erase collected
         if len(self.contains) == 1:
             pyperclip.copy(self.contains[0])
         else:
