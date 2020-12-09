@@ -29,9 +29,9 @@ class Collector(object):
         return "EXIT"
 
     def collect(self) -> str:
+        logging.info("Collected")
         pyperclip.copy("\n".join(self.contains[1:]))
         logging.debug(" ".join(self.contains[1:]))
-        logging.info("Collected")
         self.contains = []
         return "COLLECTED"
 
@@ -42,7 +42,7 @@ class Collector(object):
         """
         self.current = pyperclip.paste()
         if len(self.contains) == 0:
-            logging.info("Old")
+            logging.info("On clipboard")
             self.contains.append(self.current)
             logging.debug(self.contains[-1].replace("\n", " "))
             logging.info("Collector ready")
