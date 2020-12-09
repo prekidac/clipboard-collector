@@ -3,6 +3,9 @@ import argparse
 import pyperclip
 import logging
 import time
+import os
+import psutil
+import sys
 
 FORMAT = "%(levelname)s -- %(message)s -- line: %(lineno)s"
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)
@@ -19,6 +22,8 @@ class Collector(object):
         }
         if not self.verbose:
             logging.disable(logging.CRITICAL)
+
+    # TODO: check if its already running
 
     def backup(self) -> None:
         with open("/tmp/clipboard", "a") as f:
@@ -64,6 +69,18 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action="store_true",
                         help="display log messages")
     args = parser.parse_args()
+    old_pid = None
+    try:
+        file = "/tmp/.clip_daemon_pid"
+        with open(file, "r") as f:
+            old_pid = f.read().strip()
+    except:
+        pass
+    if old_pid and psutil.pid_exists(int(old_pid)):
+        exit("Already running!")
+    else:
+        with open(file, "w") as f:
+            f.write(str(os.getpid()))
     c = Collector(verbose=args.verbose)
     while c.check() != "EXIT":
-        time.sleep(1)
+        time.sleep(0.1)
