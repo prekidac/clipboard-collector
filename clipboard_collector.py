@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+import argparse
 import pyperclip
 import logging
 import time
@@ -9,12 +10,15 @@ logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 
 class Collector(object):
 
-    def __init__(self) -> None:
+    def __init__(self, verbose: bool = False) -> None:
         self.contains = []
+        self.verbose = verbose
         self.actions = {
             "collect": self.collect,
             "exit": self.exit_
         }
+        if not self.verbose:
+            logging.disable(logging.CRITICAL)
 
     def exit_(self) -> bool:
         self.collect()
@@ -47,6 +51,9 @@ class Collector(object):
 
 
 if __name__ == "__main__":
-    c = Collector()
+    parser = argparse.ArgumentParser(description="Clipboard collecting deamon")
+    parser.add_argument("-v", "--verbose", action="store_true", help="display log messages")
+    args = parser.parse_args()
+    c = Collector(verbose=args.verbose)
     while c.check() == "OK":
         time.sleep(1)
