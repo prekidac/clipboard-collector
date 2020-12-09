@@ -1,5 +1,5 @@
 # clipboard-collector
-Clipboard collecting deamon.  
+Clipboard collecting daemon.  
 Keywords:  
 - collect  
 - exit  
