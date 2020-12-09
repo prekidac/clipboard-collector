@@ -30,8 +30,12 @@ class Collector(object):
 
     def collect(self) -> str:
         logging.info("Collected")
-        pyperclip.copy("\n".join(self.contains[1:]))
         logging.debug(" ".join(self.contains[1:]))
+        # prevent multiple copy of collect to erase collected
+        if len(self.contains) == 1:
+            pyperclip.copy(self.contains[0])
+        else:
+            pyperclip.copy("\n".join(self.contains[1:]))
         self.contains = []
         return "COLLECTED"
 
