@@ -47,7 +47,7 @@ class Collector(object):
         Check for changes
         Returns: status
         """
-        self.current = str(pyperclip.paste())
+        self.current = pyperclip.paste()
         if len(self.contains) == 0:
             logging.info("On clipboard")
             self.contains.append(self.current)
@@ -81,4 +81,4 @@ if __name__ == "__main__":
             f.write(str(os.getpid()))
     c = Collector(verbose=args.verbose)
     while c.check() != "EXIT":
-        time.sleep(0.1)
+        time.sleep(0.5)
