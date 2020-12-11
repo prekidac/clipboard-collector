@@ -37,8 +37,10 @@ class Collector(object):
         # prevent multiple copy of 'collect' to erase collected
         if len(self.contains) == 1:
             pyperclip.copy(self.contains[0])
+            time.sleep(0.1)
         else:
             pyperclip.copy("\n".join(self.contains[1:]))
+            time.sleep(0.1)
         self.contains = []
         return "COLLECTED"
 
@@ -48,6 +50,7 @@ class Collector(object):
         Returns: status
         """
         self.current = pyperclip.paste()
+        time.sleep(0.1)
         if len(self.contains) == 0:
             logging.info("On clipboard")
             self.contains.append(self.current)
