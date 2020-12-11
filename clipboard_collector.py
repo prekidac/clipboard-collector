@@ -47,7 +47,7 @@ class Collector(object):
         Check for changes
         Returns: status
         """
-        self.current = pyperclip.paste()
+        self.current = str(pyperclip.paste())
         if len(self.contains) == 0:
             logging.info("On clipboard")
             self.contains.append(self.current)
