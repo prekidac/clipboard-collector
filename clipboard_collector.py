@@ -10,19 +10,6 @@ import sys
 ENCODING = "utf-8"
 
 
-def copy(text):
-    p = subprocess.Popen(["xsel", "-b", "-i"],
-                         stdin=subprocess.PIPE, close_fds=True)
-    p.communicate(input=text.encode(ENCODING), timeout=1)
-
-
-def paste():
-    p = subprocess.Popen(["xsel", "-b", "-o"],
-                         stdout=subprocess.PIPE, close_fds=True)
-    stdout, stderr = p.communicate(timeout=1)
-    return stdout.decode(ENCODING)
-
-
 FORMAT = "%(filename)s - %(levelname)s -- %(message)s -- line: %(lineno)s"
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 
@@ -37,7 +24,23 @@ class Collector(object):
             "exit": self.exit_
         }
         if not self.verbose:
-            logging.disable(logging.CRITICAL)
+            logging.disable(logging.WARNING)
+
+    def copy(self, text):
+        p = subprocess.Popen(["xsel", "-b", "-i"],
+                             stdin=subprocess.PIPE, close_fds=True)
+        p.communicate(input=text.encode(ENCODING), timeout=1)
+
+    def paste(self):
+        p = subprocess.Popen(["xsel", "-b", "-o"],
+                             stdout=subprocess.PIPE, close_fds=True)
+        try:
+            stdout, stderr = p.communicate(timeout=1)
+        except Exception as exc:
+            p.kill()
+            logging.error(exc)
+            raise
+        return stdout.decode(ENCODING)
 
     def backup(self) -> None:
         with open("/tmp/clipboard", "a") as f:
@@ -52,9 +55,9 @@ class Collector(object):
         logging.debug(" ".join(self.contains[1:]))
         # prevent multiple copy of "collect" to erase collected
         if len(self.contains) == 1:
-            copy(self.contains[0])
+            self.copy(self.contains[0])
         else:
-            copy("\n".join(self.contains[1:]))
+            self.copy("\n".join(self.contains[1:]))
         self.contains = []
         return "COLLECTED"
 
@@ -64,9 +67,9 @@ class Collector(object):
         Returns: status
         """
         try:
-            self.current = paste()
-        except Exception as exc:
-            logging.error(exc)
+            self.current = self.paste()
+        except:
+            pass
         if len(self.contains) == 0:
             logging.info("On clipboard")
             self.contains.append(self.current)
