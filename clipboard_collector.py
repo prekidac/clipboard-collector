@@ -1,13 +1,27 @@
 #! /usr/bin/env python3
 import argparse
-import pyperclip
+import subprocess
 import logging
 import time
 import os
 import psutil
 import sys
 
-pyperclip.set_clipboard("xsel")
+ENCODING = "utf-8"
+
+
+def copy(text):
+    p = subprocess.Popen(["xsel", "-b", "-i", "-t5"],
+                         stdin=subprocess.PIPE, close_fds=True)
+    p.communicate(input=text.encode(ENCODING))
+
+
+def paste():
+    p = subprocess.Popen(["xsel", "-b", "-o"],
+                         stdout=subprocess.PIPE, close_fds=True)
+    stdout, stderr = p.communicate()
+    return stdout.decode(ENCODING)
+
 
 FORMAT = "%(levelname)s -- %(message)s -- line: %(lineno)s"
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)
@@ -36,11 +50,11 @@ class Collector(object):
     def collect(self) -> str:
         logging.info("Collected")
         logging.debug(" ".join(self.contains[1:]))
-        # prevent multiple copy of 'collect' to erase collected
+        # prevent multiple copy of "collect" to erase collected
         if len(self.contains) == 1:
-            pyperclip.copy(self.contains[0])
+            copy(self.contains[0])
         else:
-            pyperclip.copy("\n".join(self.contains[1:]))
+            copy("\n".join(self.contains[1:]))
         self.contains = []
         return "COLLECTED"
 
@@ -49,7 +63,7 @@ class Collector(object):
         Check for changes
         Returns: status
         """
-        self.current = pyperclip.paste()
+        self.current = paste()
         if len(self.contains) == 0:
             logging.info("On clipboard")
             self.contains.append(self.current)
