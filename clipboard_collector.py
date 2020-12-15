@@ -11,13 +11,13 @@ ENCODING = "utf-8"
 
 
 def copy(text):
-    p = subprocess.Popen(["xsel", "-b", "-i", "-t5"],
+    p = subprocess.Popen(["xsel", "-b", "-i"],
                          stdin=subprocess.PIPE, close_fds=True)
     p.communicate(input=text.encode(ENCODING))
 
 
 def paste():
-    p = subprocess.Popen(["xsel", "-b", "-o"],
+    p = subprocess.Popen(["xsel", "-b", "-o", "-t 5"],
                          stdout=subprocess.PIPE, close_fds=True)
     stdout, stderr = p.communicate()
     return stdout.decode(ENCODING)
