@@ -13,17 +13,17 @@ ENCODING = "utf-8"
 def copy(text):
     p = subprocess.Popen(["xsel", "-b", "-i"],
                          stdin=subprocess.PIPE, close_fds=True)
-    p.communicate(input=text.encode(ENCODING))
+    p.communicate(input=text.encode(ENCODING), timeout=1)
 
 
 def paste():
-    p = subprocess.Popen(["xsel", "-b", "-o", "-t 5"],
+    p = subprocess.Popen(["xsel", "-b", "-o"],
                          stdout=subprocess.PIPE, close_fds=True)
-    stdout, stderr = p.communicate()
+    stdout, stderr = p.communicate(timeout=1)
     return stdout.decode(ENCODING)
 
 
-FORMAT = "%(levelname)s -- %(message)s -- line: %(lineno)s"
+FORMAT = "%(filename)s - %(levelname)s -- %(message)s -- line: %(lineno)s"
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 
 
@@ -63,7 +63,10 @@ class Collector(object):
         Check for changes
         Returns: status
         """
-        self.current = paste()
+        try:
+            self.current = paste()
+        except Exception as exc:
+            logging.error(exc)
         if len(self.contains) == 0:
             logging.info("On clipboard")
             self.contains.append(self.current)
