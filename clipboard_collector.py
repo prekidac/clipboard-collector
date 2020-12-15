@@ -7,6 +7,8 @@ import os
 import psutil
 import sys
 
+pyperclip.set_clipboard("xsel")
+
 FORMAT = "%(levelname)s -- %(message)s -- line: %(lineno)s"
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 
@@ -37,10 +39,8 @@ class Collector(object):
         # prevent multiple copy of 'collect' to erase collected
         if len(self.contains) == 1:
             pyperclip.copy(self.contains[0])
-            time.sleep(0.1)
         else:
             pyperclip.copy("\n".join(self.contains[1:]))
-            time.sleep(0.1)
         self.contains = []
         return "COLLECTED"
 
@@ -50,7 +50,6 @@ class Collector(object):
         Returns: status
         """
         self.current = pyperclip.paste()
-        time.sleep(0.1)
         if len(self.contains) == 0:
             logging.info("On clipboard")
             self.contains.append(self.current)
@@ -84,4 +83,4 @@ if __name__ == "__main__":
             f.write(str(os.getpid()))
     c = Collector(verbose=args.verbose)
     while c.check() != "EXIT":
-        time.sleep(0.5)
+        time.sleep(0.1)

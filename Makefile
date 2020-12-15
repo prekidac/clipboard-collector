@@ -7,7 +7,7 @@ all:
 	@echo "To install type 'sudo make install'"
 
 install:
-	sudo apt install xclip xsel
+	sudo apt install xsel
 	pip3 install pyperclip
 	sudo mkdir -p ${DIR}
 	cp clipboard_collector.py ${DIR}
