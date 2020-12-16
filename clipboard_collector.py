@@ -29,7 +29,12 @@ class Collector(object):
     def copy(self, text):
         p = subprocess.Popen(["xsel", "-b", "-i"],
                              stdin=subprocess.PIPE, close_fds=True)
-        p.communicate(input=text.encode(ENCODING), timeout=1)
+        try:
+            p.communicate(input=text.encode(ENCODING), timeout=1)
+        except Exception as exc:
+            p.kill()
+            logging.error(exc)
+            raise
 
     def paste(self):
         p = subprocess.Popen(["xsel", "-b", "-o"],
@@ -54,10 +59,16 @@ class Collector(object):
         logging.info("Collected")
         logging.debug(" ".join(self.contains[1:]))
         # prevent multiple copy of "collect" to erase collected
-        if len(self.contains) == 1:
-            self.copy(self.contains[0])
-        else:
-            self.copy("\n".join(self.contains[1:]))
+        while True:
+            try:
+                if len(self.contains) == 1:
+                    self.copy(self.contains[0])
+                    break
+                else:
+                    self.copy("\n".join(self.contains[1:]))
+                    break
+            except Exception as exc:
+                logging.error(exc)
         self.contains = []
         return "COLLECTED"
 
