@@ -29,12 +29,13 @@ class Collector(object):
     def copy(self, text):
         p = subprocess.Popen(["xsel", "-b", "-i"],
                              stdin=subprocess.PIPE, close_fds=True)
-        try:
-            p.communicate(input=text.encode(ENCODING), timeout=1)
-        except Exception as exc:
-            p.kill()
-            logging.error(exc)
-            raise
+        while True:
+            try:
+                p.communicate(input=text.encode(ENCODING), timeout=1)
+                break
+            except Exception as exc:
+                p.kill()
+                logging.error(exc)
 
     def paste(self):
         p = subprocess.Popen(["xsel", "-b", "-o"],
@@ -44,7 +45,7 @@ class Collector(object):
         except Exception as exc:
             p.kill()
             logging.error(exc)
-            raise
+            return None
         return stdout.decode(ENCODING)
 
     def backup(self) -> None:
@@ -59,16 +60,10 @@ class Collector(object):
         logging.info("Collected")
         logging.debug(" ".join(self.contains[1:]))
         # prevent multiple copy of "collect" to erase collected
-        while True:
-            try:
-                if len(self.contains) == 1:
-                    self.copy(self.contains[0])
-                    break
-                else:
-                    self.copy("\n".join(self.contains[1:]))
-                    break
-            except Exception as exc:
-                logging.error(exc)
+        if len(self.contains) == 1:
+            self.copy(self.contains[0])
+        else:
+            self.copy("\n".join(self.contains[1:]))
         self.contains = []
         return "COLLECTED"
 
@@ -77,10 +72,9 @@ class Collector(object):
         Check for changes
         Returns: status
         """
-        try:
-            self.current = self.paste()
-        except:
-            pass
+        paste = self.paste()
+        if paste: 
+            self.current = paste
         if len(self.contains) == 0:
             logging.info("On clipboard")
             self.contains.append(self.current)
