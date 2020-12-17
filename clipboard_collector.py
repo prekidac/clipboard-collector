@@ -26,7 +26,7 @@ class Collector(object):
         if not self.verbose:
             logging.disable(logging.WARNING)
 
-    def copy(self, text):
+    def copy(self, text) -> None:
         p = subprocess.Popen(["xsel", "-b", "-i"],
                              stdin=subprocess.PIPE, close_fds=True)
         while True:
@@ -37,7 +37,7 @@ class Collector(object):
                 p.kill()
                 logging.error(exc)
 
-    def paste(self):
+    def paste(self) -> str:
         p = subprocess.Popen(["xsel", "-b", "-o"],
                              stdout=subprocess.PIPE, close_fds=True)
         try:
@@ -45,7 +45,7 @@ class Collector(object):
         except Exception as exc:
             p.kill()
             logging.error(exc)
-            return None
+            return ""
         return stdout.decode(ENCODING)
 
     def backup(self) -> None:
