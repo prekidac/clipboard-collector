@@ -72,15 +72,13 @@ class Collector(object):
         Check for changes
         Returns: status
         """
-        paste = self.paste()
-        if paste: 
-            self.current = paste
+        self.current = self.paste()
         if len(self.contains) == 0:
             logging.info("On clipboard")
             self.contains.append(self.current)
             logging.debug(self.contains[-1].replace("\n", " "))
             logging.info("Collector ready")
-        if self.contains[-1] != self.current:
+        if self.current and self.contains[-1] != self.current:
             if self.current in self.actions.keys():
                 return self.actions[self.current]()
             logging.debug(self.current)
