@@ -1,5 +1,4 @@
 #! /usr/bin/env python3
-import argparse
 import subprocess
 import logging
 import time
@@ -13,18 +12,17 @@ ENCODING = "utf-8"
 FORMAT = "%(filename)s - %(levelname)s -- %(message)s -- line: %(lineno)s"
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 
+logging.disable(logging.WARNING)
+
 
 class Collector(object):
 
-    def __init__(self, verbose: bool = False) -> None:
+    def __init__(self) -> None:
         self.contains = []
-        self.verbose = verbose
         self.actions = {
             "collect": self.collect,
             "exit": self.exit_
         }
-        if not self.verbose:
-            logging.disable(logging.WARNING)
 
     def copy(self, text) -> None:
         p = subprocess.Popen(["xsel", "-b", "-i"],
@@ -88,10 +86,6 @@ class Collector(object):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Clipboard collecting deamon")
-    parser.add_argument("-v", "--verbose", action="store_true",
-                        help="display log messages")
-    args = parser.parse_args()
     old_pid = None
     try:
         file = "/tmp/.clip_daemon_pid"
@@ -104,6 +98,6 @@ if __name__ == "__main__":
     else:
         with open(file, "w") as f:
             f.write(str(os.getpid()))
-    c = Collector(verbose=args.verbose)
+    c = Collector()
     while c.check() != "EXIT":
         time.sleep(0.1)
