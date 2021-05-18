@@ -1,14 +1,10 @@
 .PHONY: all install
 
-PREFIX=/usr/local
-DIR=${PREFIX}/share/clipboard-collector
+BIN=~/.local/bin
 
 all:
-	@echo "To install type 'sudo make install'"
+	@echo "To install type 'make install'"
 
 install:
 	sudo apt install xsel
-	sudo mkdir -p ${DIR}
-	cp clipboard_collector.py ${DIR}
-	ln -sf ${DIR}/clipboard_collector.py ${PREFIX}/bin/clipboard_collector
-	chmod +x ${PREFIX}/bin/clipboard_collector
+	cp clipboard_collector.py ${BIN}/clipboard_collector
