@@ -19,6 +19,7 @@ class Collector(object):
 
     def __init__(self) -> None:
         self.contains = []
+        self.status = "OK"
         self.actions = {
             "collect": self.collect,
             "exit": self.exit_
@@ -50,39 +51,38 @@ class Collector(object):
         with open("/tmp/clipboard", "a") as f:
             f.write(self.current + "\n")
 
-    def exit_(self) -> str:
+    def exit_(self) -> None:
         self.collect()
-        return "EXIT"
+        self.status = "EXIT"
 
-    def collect(self) -> str:
-        logging.info("Collected")
-        logging.debug(" ".join(self.contains[1:]))
+    def collect(self) -> None:
+        logging.debug(f"Collected: {' '.join(self.contains[1:])}")
         # prevent multiple copy of "collect" to erase collected
         if len(self.contains) == 1:
             self.copy(self.contains[0])
         else:
             self.copy("\n".join(self.contains[1:]))
         self.contains = []
-        return "COLLECTED"
+        self.status = "COLLECTED"
 
-    def check(self) -> str:
-        """
-        Check for changes
-        Returns: status
-        """
+    def check(self) -> None:
         self.current = self.paste()
         if len(self.contains) == 0:
-            logging.info("On clipboard")
             self.contains.append(self.current)
-            logging.debug(self.contains[-1].replace("\n", " "))
-            logging.info("Collector ready")
-        if self.current and self.contains[-1] != self.current:
-            if self.current in self.actions.keys():
-                return self.actions[self.current]()
-            logging.debug(self.current)
-            self.contains.append(self.current)
-            self.backup()
-        return "OK"
+            logging.debug(f"On clipboard: {self.contains[0]}")
+        elif self.current and self.contains[-1] != self.current:
+            if self.current in self.actions:
+                self.actions[self.current]()
+            else:
+                logging.debug(self.current)
+                self.contains.append(self.current)
+                self.backup()
+    
+    def loop(self) -> None:
+        while self.status != "EXIT":
+            self.check()
+            time.sleep(0.1)
+
 
 
 if __name__ == "__main__":
@@ -99,5 +99,4 @@ if __name__ == "__main__":
         with open(file, "w") as f:
             f.write(str(os.getpid()))
     c = Collector()
-    while c.check() != "EXIT":
-        time.sleep(0.1)
+    c.loop()
