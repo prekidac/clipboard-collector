@@ -7,4 +7,5 @@ all:
 
 install:
 	sudo apt install xsel
+	pip3 install psutil
 	cp clipboard_collector.py ${BIN}/clipboard_collector
